@@ -1,3 +1,3 @@
 # DQF
-
+This code forked off from [code for NSSG](https://github.com/ZJULearning/ssg) algorithm.
 Under construcion...
