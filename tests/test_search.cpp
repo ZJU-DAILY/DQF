@@ -1,3 +1,7 @@
+//
+// Created by 付聪 on 2017/6/21.
+//
+
 #include "efanna2e/index_graph.h"
 #include "index_random.h"
 #include "index_ssg.h"
@@ -75,14 +79,13 @@ int main(int argc, char **argv)
   unsigned D_num = points_num * 0.9;
   unsigned Q_num = points_num - D_num;
   unsigned QD_num = D_num * 0.005;
-  unsigned shift_num = Q_num * 0.05;
   unsigned Qhis_num = Q_num * 10;
   unsigned Qtest_num = 1000;
   unsigned train_num = 10000;
   unsigned beta = std::atoi(argv[13]);
   unsigned K = std::atoi(argv[14]);
-  unsigned L = std::atoi(argv[15]);
-  double alpha = std::atof(argv[16]);
+  unsigned L = K;
+  double alpha = std::atof(argv[15]);
   unsigned S_L = K + (L - K) / beta;
 
   std::vector<float> probabilities = generate_query_probabilities(Q_num, alpha);
@@ -102,30 +105,19 @@ int main(int argc, char **argv)
   }
   free(data_load);
 
-  std::vector<unsigned> ids;
-  std::set<unsigned> ids_set;
-  float *QD_load = new float[QD_num * dim * 2];
-  int pos = 0;
-  int pre_pos = 0;
-
-  ssg::IndexRandom init_index_DQF(dim, D_num);
-  ssg::IndexSSG index_DQF(dim, D_num, QD_num, ssg::FAST_L2,
-                          (ssg::Index *)(&init_index_DQF));
-
-  for (int it = 0; it < 11; it++)
+  unsigned add_L = 5;
+  double last_recall = 0;
+  while (true)
   {
-    std::cout << "Iteration " << it + 1 << ":\n";
-    if (it > 0)
-    {
-      for (unsigned i = 0; i < shift_num; i++)
-      {
-        unsigned pos = std::rand() % Q_num;
-        unsigned pos2 = std::rand() % Q_num;
-        std::swap(probabilities[pos], probabilities[pos2]);
-      }
-      Qhis = generate_query_ids(Qhis_num, probabilities);
-      Qtest = generate_query_ids(Qtest_num, probabilities);
-    }
+
+    std::cout << "L: " << L << " " << "S_L: " << S_L << std::endl;
+    std::vector<unsigned> ids;
+    float *QD_load = new float[QD_num * dim];
+    int pos = 0;
+
+    ssg::IndexRandom init_index_DQF(dim, D_num);
+    ssg::IndexSSG index_DQF(dim, D_num, QD_num, ssg::FAST_L2,
+                            (ssg::Index *)(&init_index_DQF));
 
     std::set<unsigned> unique_Qhis(Qhis.begin(), Qhis.end());
     std::vector<unsigned> train_ids(unique_Qhis.begin(), unique_Qhis.end());
@@ -138,7 +130,6 @@ int main(int argc, char **argv)
     paras.Set<unsigned>("S_L_search", S_L);
     paras.Set<unsigned>("freq", 50);
     std::vector<std::vector<unsigned>> res(Qhis_num);
-
     ssg::IndexRandom init_index(dim, D_num);
     ssg::IndexSSG index(dim, D_num, ssg::FAST_L2,
                         (ssg::Index *)(&init_index));
@@ -146,7 +137,6 @@ int main(int argc, char **argv)
     index.OptimizeGraph(D_load);
     for (unsigned i = 0; i < Qhis_num; i++)
       res[i].resize(K);
-
 #pragma omp parallel for
     for (unsigned i = 0; i < Qhis_num; i++)
     {
@@ -167,35 +157,15 @@ int main(int argc, char **argv)
       count_cal_pair[i].second = i;
     }
     sort(count_cal_pair.begin(), count_cal_pair.end(), std::greater<std::pair<unsigned, unsigned>>());
-
-    if (it == 0)
+    for (unsigned i = 0; i < QD_num; i++)
     {
-      for (unsigned i = 0; i < QD_num; i++)
-      {
-        ids.push_back(count_cal_pair[i].second);
-        ids_set.insert(count_cal_pair[i].second);
-      }
-      for (unsigned i = 0; i < QD_num; ++i)
-      {
-        std::memcpy(QD_load + pos * dim, D_load + count_cal_pair[i].second * dim, dim * sizeof(float));
-        pos++;
-      }
+      ids.push_back(count_cal_pair[i].second);
     }
-    else
+    for (unsigned i = 0; i < QD_num; ++i)
     {
-      for (unsigned i = 0; i < QD_num / 2; i++)
-      {
-        unsigned id = count_cal_pair[i].second;
-        if (ids_set.count(id) == 0)
-        {
-          ids.push_back(id);
-          ids_set.insert(id);
-          std::memcpy(QD_load + pos * dim, D_load + id * dim, dim * sizeof(float));
-          pos++;
-        }
-      }
+      std::memcpy(QD_load + pos * dim, D_load + count_cal_pair[i].second * dim, dim * sizeof(float));
+      pos++;
     }
-    std::cout << "Add " << pos - pre_pos << " points to QD_load.\n";
 
     ssg::Distance *dist_func = new ssg::DistanceL2();
     std::vector<std::vector<unsigned>> QA(Qtest_num, std::vector<unsigned>(K));
@@ -228,39 +198,27 @@ int main(int argc, char **argv)
     paras_ssg.Set<float>("A", A);
     paras_ssg.Set<unsigned>("n_try", n_try);
     paras_ssg.Set<std::string>("nn_graph_path", nn_graph_path);
+    ssg::IndexRandom init_index_knng(dim, QD_num);
+    efanna2e::IndexGraph index_knng(dim, QD_num, efanna2e::FAST_L2, (efanna2e::Index *)(&init_index_knng));
+    efanna2e::Parameters paras_knng;
+    paras_knng.Set<unsigned>("K", K_knng);
+    paras_knng.Set<unsigned>("L", L_knng);
+    paras_knng.Set<unsigned>("iter", iter);
+    paras_knng.Set<unsigned>("S", S_knng);
+    paras_knng.Set<unsigned>("R", R_knng);
+    index_knng.Build(QD_num, QD_load, paras_knng);
+    index_knng.Save(s_knng_path);
 
-    if (it == 0)
-    {
-      ssg::IndexRandom init_index_knng(dim, QD_num);
-      efanna2e::IndexGraph index_knng(dim, QD_num, efanna2e::FAST_L2, (efanna2e::Index *)(&init_index_knng));
-      efanna2e::Parameters paras_knng;
-      paras_knng.Set<unsigned>("K", K_knng);
-      paras_knng.Set<unsigned>("L", L_knng);
-      paras_knng.Set<unsigned>("iter", iter);
-      paras_knng.Set<unsigned>("S", S_knng);
-      paras_knng.Set<unsigned>("R", R_knng);
-      index_knng.Build(QD_num, QD_load, paras_knng);
-      index_knng.Save(s_knng_path);
+    ssg::IndexRandom init_index_ssg(dim, QD_num);
+    ssg::IndexSSG index_ssg(dim, QD_num, ssg::FAST_L2,
+                            (ssg::Index *)(&init_index_ssg));
 
-      ssg::IndexRandom init_index_ssg(dim, QD_num);
-      ssg::IndexSSG index_ssg(dim, QD_num, ssg::FAST_L2,
-                              (ssg::Index *)(&init_index_ssg));
+    index_ssg.Build(QD_num, QD_load, paras_ssg);
+    index_ssg.Save(s_ssg_path);
 
-      index_ssg.Build(QD_num, QD_load, paras_ssg);
-      index_ssg.Save(s_ssg_path);
+    index_DQF.LoadWithSGraph(ssg_path, s_ssg_path);
+    index_DQF.OptimizeGraphWithSGraph(D_load, QD_load);
 
-      index_DQF.LoadWithSGraph(ssg_path, s_ssg_path);
-      index_DQF.OptimizeGraphWithSGraph_MoreSpace(D_load, QD_load, QD_num * 2);
-    }
-    else
-    {
-      auto s = std::chrono::high_resolution_clock::now();
-      index_DQF.Insert(QD_load, pre_pos, pos, paras_ssg);
-      auto e = std::chrono::high_resolution_clock::now();
-      std::chrono::duration<double> diff = e - s;
-      std::cout << "Insert time: " << diff.count() << " seconds.\n";
-    }
-    pre_pos = pos;
     for (unsigned i = 0; i < train_num; i++)
       res[i].resize(K);
     std::vector<ssg::TrainData> train_data;
@@ -306,32 +264,24 @@ int main(int argc, char **argv)
     cv::Ptr<cv::ml::TrainData>
         trainDataObj = cv::ml::TrainData::create(trainData, cv::ml::ROW_SAMPLE, responses);
 
-    auto s = std::chrono::high_resolution_clock::now();
     if (dtree->train(trainDataObj))
     {
       dtree->save("decision_tree_model.yml");
     }
-    auto e = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = e - s;
-    // std::cout << "Train time: " << diff.count() << " seconds.\n";
 
-    if (it == 0)
-    {
-      for (unsigned i = 0; i < Qtest_num; i++)
-      {
-        index.SearchWithOptGraph(Q_load + Qtest[i] * dim, K, paras, res[i].data());
-      }
-    }
-
-    s = std::chrono::high_resolution_clock::now();
     for (unsigned i = 0; i < Qtest_num; i++)
     {
       index.SearchWithOptGraph(Q_load + Qtest[i] * dim, K, paras, res[i].data());
     }
-    e = std::chrono::high_resolution_clock::now();
-    diff = e - s;
 
-    double accuracy = 0.0;
+    double pre_recall = 0.0;
+    auto s = std::chrono::high_resolution_clock::now();
+    for (unsigned i = 0; i < Qtest_num; i++)
+    {
+      index.SearchWithOptGraph(Q_load + Qtest[i] * dim, K, paras, res[i].data());
+    }
+    auto e = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> diff = e - s;
     for (unsigned i = 0; i < Qtest_num; ++i)
     {
       std::set<unsigned> result(res[i].begin(), res[i].end());
@@ -339,19 +289,45 @@ int main(int argc, char **argv)
       {
         if (result.count(QA[i][j]))
         {
-          accuracy += 1.0;
+          pre_recall += 1.0;
         }
       }
     }
-    accuracy = accuracy / (Qtest_num * K);
+    pre_recall = pre_recall / (Qtest_num * K);
     float pre_qps = Qtest_num / diff.count();
-    float pre_recall = accuracy;
-
     std::cout << "Pre QPS:" << Qtest_num / diff.count() << ',';
-    std::cout << "Pre Recall: " << accuracy << '\n';
+    std::cout << "Pre Recall: " << pre_recall << '\n';
+
 
     for (unsigned i = 0; i < Qtest_num; i++)
       res[i].resize(K);
+    double ab_recall = 0.0;
+    s = std::chrono::high_resolution_clock::now();
+    for (unsigned i = 0; i < Qtest_num; i++)
+    {
+      index_DQF.SearchWithoutDtree(Q_load + Qtest[i] * dim, K, paras, res[i].data(), ids.data());
+    }
+    e = std::chrono::high_resolution_clock::now();
+    diff = e - s;
+    for (unsigned i = 0; i < Qtest_num; ++i)
+    {
+      std::set<unsigned> result(res[i].begin(), res[i].end());
+      for (unsigned j = 0; j < K; ++j)
+      {
+        if (result.count(QA[i][j]))
+        {
+          ab_recall += 1.0;
+        }
+      }
+    }
+    ab_recall = ab_recall / (Qtest_num * K);
+    float ab_qps = Qtest_num / diff.count();
+    std::cout << "Ablation QPS: " << ab_qps << ',';
+    std::cout << "Ablation Recall: " << ab_recall << '\n';
+
+    for (unsigned i = 0; i < Qtest_num; i++)
+      res[i].resize(K);
+    double recall = 0.0;
     s = std::chrono::high_resolution_clock::now();
     for (unsigned i = 0; i < Qtest_num; i++)
     {
@@ -359,9 +335,6 @@ int main(int argc, char **argv)
     }
     e = std::chrono::high_resolution_clock::now();
     diff = e - s;
-    float qps = Qtest_num / diff.count();
-    std::cout << "QPS: " << Qtest_num / diff.count() << ',';
-    accuracy = 0.0;
     for (unsigned i = 0; i < Qtest_num; ++i)
     {
       std::set<unsigned> result(res[i].begin(), res[i].end());
@@ -369,12 +342,24 @@ int main(int argc, char **argv)
       {
         if (result.count(QA[i][j]))
         {
-          accuracy += 1.0;
+          recall += 1.0;
         }
       }
     }
-    accuracy = accuracy / (Qtest_num * K);
-    std::cout << "Recall: " << accuracy << '\n';
+    recall = recall / (Qtest_num * K);
+    float qps = Qtest_num / diff.count();
+    std::cout << "QPS: " << qps << ',';
+    std::cout << "Recall: " << recall << '\n';
+    if (pre_recall > 0.99)
+      break;
+    if (pre_recall - last_recall < 0.01)
+    {
+      add_L *= 2;
+    }
+    L += add_L;
+    S_L = K + (L - K) / beta;
+    index.FreeOptimizeGraph();
+    index_DQF.FreeOptimizeGraph();
+    last_recall = pre_recall;
   }
-  return 0;
 }
