@@ -16,7 +16,6 @@ Benchmark datasets
 
 How to use
 ### 0. Download the dataset
-------
 ```bash
 mkdir -p ./build/data && cd ./build/data
 wget ftp://ftp.irisa.fr/local/texmex/corpus/sift.tar.gz
