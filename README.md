@@ -44,7 +44,7 @@ make -j
 ./test_search ../data/sift/sift_base.fvecs sift.ssg sift_s.knng sift_s.ssg 200 200 12 10 100 100 50 60 50 10 1.2
 ```
 
-### 3. Test query shift
+### 4. Test query shift
 ```bash
 ./test_query_shift ../data/sift/sift_base.fvecs sift.ssg sift_s.knng sift_s.ssg 200 200 12 10 100 100 50 60 50 10 20 1.2
 ```
