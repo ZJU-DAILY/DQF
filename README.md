@@ -17,6 +17,9 @@ Benchmark datasets
 How to use
 ------
 ### 0. Download the dataset
+
+In here, we use SIFT1M as an example. 
+
 ```bash
 mkdir -p ./build/data && cd ./build/data
 wget ftp://ftp.irisa.fr/local/texmex/corpus/sift.tar.gz
@@ -24,11 +27,24 @@ tar -xf sift.tar.gz
 cd ..
 ```
 
-
-
 ### 1. Compile
 Prerequisite : openmp, opencv, cmake, boost
 ```bash
 cmake ..
 make -j
+```
+
+### 2. Build the full index
+```bash
+./test_build_full_index ../data/sift/sift_base.fvecs ./sift.knng ./sift.ssg 200 200 12 10 100 100 50 60
+```
+
+### 3. Search
+```bash
+./test_search ../data/sift/sift_base.fvecs sift.ssg sift_s.knng sift_s.ssg 200 200 12 10 100 100 50 60 50 10 1.2
+```
+
+### 3. Test query shift
+```bash
+./test_query_shift ../data/sift/sift_base.fvecs sift.ssg sift_s.knng sift_s.ssg 200 200 12 10 100 100 50 60 50 10 20 1.2
 ```
