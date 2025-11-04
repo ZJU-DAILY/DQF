@@ -15,4 +15,19 @@ Benchmark datasets
 
 
 How to use
+### 0. Download the dataset
 ------
+```bash
+mkdir -p ./build/data && cd ./build/data
+wget ftp://ftp.irisa.fr/local/texmex/corpus/sift.tar.gz
+tar -xf sift.tar.gz
+```
+
+
+
+### 1. Compile
+Prerequisite : openmp, opencv, cmake, boost
+```bash
+mkdir -p build && cd build
+cmake .. && make -j
+```
