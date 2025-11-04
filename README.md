@@ -21,6 +21,7 @@ How to use
 mkdir -p ./build/data && cd ./build/data
 wget ftp://ftp.irisa.fr/local/texmex/corpus/sift.tar.gz
 tar -xf sift.tar.gz
+cd ..
 ```
 
 
@@ -28,6 +29,6 @@ tar -xf sift.tar.gz
 ### 1. Compile
 Prerequisite : openmp, opencv, cmake, boost
 ```bash
-mkdir -p build && cd build
-cmake .. && make -j
+cmake ..
+make -j
 ```
