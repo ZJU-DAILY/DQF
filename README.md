@@ -62,7 +62,7 @@ To test all datasets, the Bash commands are as follows:
 For example:
 ```bash
 cd /path/to/project/build/tests/
-./test_search data_path ssg_path hot_knn_graph_path hot_ssg_path K L_KNNG iter S R_KNNG L_SSG R_SSG Angle Beta
+./test_search data_path ssg_path hot_knn_graph_path hot_ssg_path K L_KNNG iter S R_KNNG L_SSG R_SSG Angle Beta K Alpha
 ```
 
 * **data\_path**: Path to the original data.
@@ -86,7 +86,7 @@ To test all datasets, the Bash commands are as follows:
 For example:
 ```bash
 cd /path/to/project/build/tests/
-./test_search data_path ssg_path hot_knn_graph_path hot_ssg_path K L_KNNG iter S R_KNNG L_SSG R_SSG Angle Beta
+./test_query_shift data_path ssg_path hot_knn_graph_path hot_ssg_path K L_KNNG iter S R_KNNG L_SSG R_SSG Angle Beta K L Alpha
 ```
 
 * **data\_path**: Path to the original data.
@@ -95,6 +95,7 @@ cd /path/to/project/build/tests/
 * **L\_SSG, R\_SSG, Angle**: Parameters of [NSSG](https://github.com/ZJULearning/ssg), built for the hot index (same as the full index).
 * **Beta**: Used to calculate the hot index S_L = K + (L - K) / beta.
 * **K**: Number of final nearest neighbors.
+* **L**: Limit on the number of candidate nodes during search.
 * **Alpha**: Parameter of the Zipf distribution (default: 1.2).
 
 To test all datasets, the Bash commands are as follows:
