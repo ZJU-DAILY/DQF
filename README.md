@@ -1,5 +1,4 @@
 # DQF
-### Under construcion...
 
 DQF (Dual-Index Query Framework) is a novel high-dimensional approximate nearest neighbor search framework that leverages a dual-layer index structure and dynamic search strategy based on a decision tree. It optimizes search efficiency by prioritizing high-frequency queries through a "hot index" and managing dynamic query distributions with an incremental update mechanism. This code forked off from [code for NSSG](https://github.com/ZJULearning/ssg) algorithm.
 
