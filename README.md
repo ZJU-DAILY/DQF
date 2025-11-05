@@ -70,6 +70,7 @@ cd /path/to/project/build/tests/
 * **Beta**: Used to calculate the hot index S_L = K + (L - K) / beta.
 * **K**: Number of final nearest neighbors.
 * **Alpha**: Parameter of the Zipf distribution (default: 1.2).
+
 To test all datasets, the Bash commands are as follows:
 
 ```bash
@@ -93,6 +94,7 @@ cd /path/to/project/build/tests/
 * **Beta**: Used to calculate the hot index S_L = K + (L - K) / beta.
 * **K**: Number of final nearest neighbors.
 * **Alpha**: Parameter of the Zipf distribution (default: 1.2).
+
 To test all datasets, the Bash commands are as follows:
 
 ```bash
