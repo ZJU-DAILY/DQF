@@ -67,6 +67,7 @@ cd /path/to/project/build/tests/
 
 * **data\_path**: Path to the original data.
 * **ssg\_path**: Path to the pre-built full SSG graph.
+* **hot\_knn\_graph\_path, hot\_ssg\_path**: Path to the hot KNNG graph and SSG graph.
 * **K, L\_KNNG, iter, S, R\_KNNG**: Parameters of [EFANNA](https://github.com/ZJULearning/efanna_graph), built for the hot index (same as the full index).
 * **L\_SSG, R\_SSG, Angle**: Parameters of [NSSG](https://github.com/ZJULearning/ssg), built for the hot index (same as the full index).
 * **Beta**: Used to calculate the hot index S_L = K + (L - K) / beta.
@@ -91,6 +92,7 @@ cd /path/to/project/build/tests/
 
 * **data\_path**: Path to the original data.
 * **ssg\_path**: Path to the pre-built full SSG graph.
+* **hot\_knn\_graph\_path, hot\_ssg\_path**: Path to the hot KNNG graph and SSG graph.
 * **K, L\_KNNG, iter, S, R\_KNNG**: Parameters of [EFANNA](https://github.com/ZJULearning/efanna_graph), built for the hot index (same as the full index).
 * **L\_SSG, R\_SSG, Angle**: Parameters of [NSSG](https://github.com/ZJULearning/ssg), built for the hot index (same as the full index).
 * **Beta**: Used to calculate the hot index S_L = K + (L - K) / beta.
