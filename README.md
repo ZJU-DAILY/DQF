@@ -1,4 +1,5 @@
 # DQF
+Under construcion...
 
 DQF (Dual-Index Query Framework) is a novel high-dimensional approximate nearest neighbor search framework that leverages a dual-layer index structure and dynamic search strategy based on a decision tree. It optimizes search efficiency by prioritizing high-frequency queries through a "hot index" and managing dynamic query distributions with an incremental update mechanism. This code forked off from [code for NSSG](https://github.com/ZJULearning/ssg) algorithm.
 
@@ -33,9 +34,6 @@ cmake ..
 make -j
 ```
 
-> **NOTE:** Data alignment is essential for the correctness of our procedure, because we use SIMD instructions for acceleration of numerical computing such as AVX and SSE2.
-You should use it to ensure your data elements (feature) is aligned with 8 or 16 int or float. For example, if your features are of dimension 70, then it should be extend to dimension 72. And the last 2 dimension should be filled with 0 to ensure the correctness of the distance computing. And this is what data\_align() does.
-
 ### 2. Build the full index
 For example:
 
@@ -53,9 +51,6 @@ cd /path/to/project/build/tests/
 To test all datasets, the Bash commands are as follows:
 ```bash
 ./test_build_full_index ../data/sift/sift_base.fvecs ./sift.knng ./sift.ssg 200 200 12 10 100 100 50 60
-./test_build_full_index ../data/gist/gist_base.fvecs ./gist.knng ./gist.ssg 400 400 12 15 100 500 70 60
-./test_build_full_index ../data/crawl/crawl_base.fvecs ./crawl.knng ./crawl.ssg 400 420 12 15 100 500 40 60
-./test_build_full_index ../data/glove-100/glove-100_base.fvecs ./glove.knng ./glove.ssg 400 420 12 20 200 500 50 60
 ```
 
 ### 3. Search
@@ -73,35 +68,11 @@ cd /path/to/project/build/tests/
 * **K**: Number of final nearest neighbors.
 * **Alpha**: Parameter of the Zipf distribution (default: 1.2).
 
-To test all datasets, the Bash commands are as follows:
-
 ```bash
 ./test_search ../data/sift/sift_base.fvecs sift.ssg sift_s.knng sift_s.ssg 200 200 12 10 100 100 50 60 50 10 1.2
-./test_search ../data/gist/gist_base.fvecs gist.ssg gist_s.knng gist_s.ssg 400 400 12 15 100 500 70 60 10 10 1.2
-./test_search ../data/crawl/crawl_base.fvecs crawl.ssg crawl_s.knng crawl_s.ssg 400 420 12 15 100 500 40 60 2 10 1.2
-./test_search ../data/glove-100/glove-100_base.fvecs glove.ssg glove_s.knng glove_s.ssg 400 420 12 20 200 500 50 60 2 10 1.2
 ```
 
 ### 4. Test query shift
-For example:
-```bash
-cd /path/to/project/build/tests/
-./test_search data_path ssg_path hot_knn_graph_path hot_ssg_path K L_KNNG iter S R_KNNG L_SSG R_SSG Angle Beta
-```
-
-* **data\_path**: Path to the original data.
-* **ssg\_path**: Path to the pre-built full SSG graph.
-* **K, L\_KNNG, iter, S, R\_KNNG**: Parameters of [EFANNA](https://github.com/ZJULearning/efanna_graph), built for the hot index (same as the full index).
-* **L\_SSG, R\_SSG, Angle**: Parameters of [NSSG](https://github.com/ZJULearning/ssg), built for the hot index (same as the full index).
-* **Beta**: Used to calculate the hot index S_L = K + (L - K) / beta.
-* **K**: Number of final nearest neighbors.
-* **Alpha**: Parameter of the Zipf distribution (default: 1.2).
-
-To test all datasets, the Bash commands are as follows:
-
 ```bash
 ./test_query_shift ../data/sift/sift_base.fvecs sift.ssg sift_s.knng sift_s.ssg 200 200 12 10 100 100 50 60 50 10 20 1.2
-./test_query_shift ../data/gist/gist_base.fvecs gist.ssg gist_s.knng gist_s.ssg 400 400 12 15 100 500 70 60 10 10 50 1.2
-./test_query_shift ../data/crawl/crawl_base.fvecs crawl.ssg crawl_s.knng crawl_s.ssg 400 420 12 15 100 500 40 60 2 10 40 1.2
-./test_query_shift ../data/glove-100/glove-100_base.fvecs glove.ssg glove_s.knng glove_s.ssg 400 420 12 20 200 500 50 60 2 10 110 1.2
 ```

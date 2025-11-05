@@ -295,8 +295,8 @@ int main(int argc, char **argv)
     }
     pre_recall = pre_recall / (Qtest_num * K);
     float pre_qps = Qtest_num / diff.count();
-    std::cout << "Pre QPS:" << Qtest_num / diff.count() << ',';
-    std::cout << "Pre Recall: " << pre_recall << '\n';
+    std::cout << "NSSG QPS:" << Qtest_num / diff.count() << ',';
+    std::cout << "NSSG Recall: " << pre_recall << '\n';
 
 
     for (unsigned i = 0; i < Qtest_num; i++)
@@ -348,8 +348,8 @@ int main(int argc, char **argv)
     }
     recall = recall / (Qtest_num * K);
     float qps = Qtest_num / diff.count();
-    std::cout << "QPS: " << qps << ',';
-    std::cout << "Recall: " << recall << '\n';
+    std::cout << "DQF QPS: " << qps << ',';
+    std::cout << "DQF Recall: " << recall << '\n';
     if (pre_recall > 0.99)
       break;
     if (pre_recall - last_recall < 0.01)
