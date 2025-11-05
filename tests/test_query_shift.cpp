@@ -347,8 +347,8 @@ int main(int argc, char **argv)
     float pre_qps = Qtest_num / diff.count();
     float pre_recall = accuracy;
 
-    std::cout << "Pre QPS:" << Qtest_num / diff.count() << ',';
-    std::cout << "Pre Recall: " << accuracy << '\n';
+    std::cout << "NSSG QPS: " << Qtest_num / diff.count() << ',';
+    std::cout << "NSSG Recall: " << accuracy << '\n';
 
     for (unsigned i = 0; i < Qtest_num; i++)
       res[i].resize(K);
@@ -360,7 +360,7 @@ int main(int argc, char **argv)
     e = std::chrono::high_resolution_clock::now();
     diff = e - s;
     float qps = Qtest_num / diff.count();
-    std::cout << "QPS: " << Qtest_num / diff.count() << ',';
+    std::cout << "DQF QPS: " << Qtest_num / diff.count() << ',';
     accuracy = 0.0;
     for (unsigned i = 0; i < Qtest_num; ++i)
     {
@@ -374,7 +374,7 @@ int main(int argc, char **argv)
       }
     }
     accuracy = accuracy / (Qtest_num * K);
-    std::cout << "Recall: " << accuracy << '\n';
+    std::cout << "DQF Recall: " << accuracy << '\n';
   }
   return 0;
 }
